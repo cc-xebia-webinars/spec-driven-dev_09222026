@@ -1,0 +1,121 @@
+# Feature Specification: Expense Policy Validator
+
+**Feature Branch**: `001-expense-policy-validator`
+
+**Created**: 2026-01-05
+
+**Status**: Clarified
+
+**Input**: User description: "Finance spends two days a month checking expense submissions against the travel policy by hand. We want a command line tool they can run against a submitted expense file that tells them which lines break policy and why. It needs to handle the per diem caps, the receipt rule, and expenses that come in euros or pounds. Finance wants to stop arguing about whether a rule was applied consistently."
+
+## Clarifications
+
+### Session 2026-01-05
+
+- Q: Which exchange rate applies when converting a foreign expense? → A: The corporate monthly rate in force on the transaction date, supplied in the policy data file. Rates are not fetched at runtime.
+- Q: Are per-diem caps applied per travel day or across the whole trip? → A: Per travel day. The first and last day of a trip are prorated to 75 percent of the daily cap.
+- Q: What happens when an expense above the receipt threshold arrives without a receipt? → A: It is a blocking violation, not a warning. The submission does not pass.
+- Q: Where do the approval tier thresholds come from? → A: The policy data file, never hard-coded. Tiers are 500 USD and 2,500 USD.
+- Q: How should the tool report results to a caller? → A: Every violation in one pass, with exit code 0 for clean, 1 for violations found, and 2 for malformed input.
+
+### Session 2026-04-02
+
+- Q: Finance has updated the travel policy for next quarter. What changes? → A: The receipt threshold rises from 75 USD to 100 USD, and CHF becomes a supported currency.
+
+## User Scenarios & Testing *(mandatory)*
+
+### User Story 1 - Check a submission against the meal per diem (Priority: P1)
+
+A Finance analyst receives an expense submission for a trip and needs to know whether any meal line exceeds the daily allowance for that destination. They run the validator against the submission file and read the violations it reports.
+
+**Why this priority**: Meal per diem is the rule that generates the most disputes and the most manual checking time. A tool that does only this is already worth running.
+
+**Independent Test**: Can be fully tested by validating a submission containing meal lines above and below the tier cap, and confirming the tool reports exactly the lines that exceed it.
+
+**Acceptance Scenarios**:
+
+1. **Given** a Tier 2 destination with a 60 USD daily meal cap, **When** a meal line of 72 USD is validated, **Then** the tool reports a per-diem violation naming the cap and the amount.
+2. **Given** a Tier 2 destination with a 60 USD daily meal cap, **When** a meal line of 48 USD is validated, **Then** the tool reports no violation for that line.
+3. **Given** a trip whose first day is a partial travel day, **When** a meal line of 50 USD falls on that day, **Then** the tool applies the prorated cap of 45 USD and reports a violation.
+
+---
+
+### User Story 2 - Enforce the receipt rule (Priority: P2)
+
+A Finance analyst needs to know which line items are missing a receipt that policy requires, so the submission can be returned to the submitter before any approval is sought.
+
+**Why this priority**: Missing receipts are the most common reason a submission is returned. Catching them automatically removes a whole round trip, but the per-diem check is more valuable if only one ships.
+
+**Independent Test**: Can be fully tested by validating a submission containing line items above and below the receipt threshold, with and without receipts attached.
+
+**Acceptance Scenarios**:
+
+1. **Given** a receipt threshold of 100 USD, **When** a 120 USD line item has no receipt, **Then** the tool reports a blocking receipt violation.
+2. **Given** a receipt threshold of 100 USD, **When** a 90 USD line item has no receipt, **Then** the tool reports no violation for that line.
+3. **Given** a 120 USD line item with a receipt reference present, **When** the submission is validated, **Then** the tool reports no receipt violation.
+
+---
+
+### User Story 3 - Handle foreign currency and approval routing (Priority: P3)
+
+A Finance analyst validates a submission containing euro and pound expenses and needs those converted to US dollars before the caps are applied, and needs to know which approval tier the total falls into.
+
+**Why this priority**: Foreign expenses are a minority of submissions, and approval routing is currently handled by a separate process. Valuable, but the submission can be checked without it.
+
+**Independent Test**: Can be fully tested by validating a submission containing EUR and GBP line items and confirming both the converted amounts and the reported approval tier.
+
+**Acceptance Scenarios**:
+
+1. **Given** a EUR line item and a rate in force on its transaction date, **When** the submission is validated, **Then** the tool compares the converted US dollar amount against the cap.
+2. **Given** a submission in a currency the policy does not list, **When** the submission is validated, **Then** the tool reports malformed input rather than guessing a rate.
+3. **Given** a submission totalling 1,800 USD, **When** the submission is validated, **Then** the tool reports that director approval is required.
+
+---
+
+### Edge Cases
+
+- What happens when a trip is a single day, making it both the first and last day? The prorated cap is applied once, not twice.
+- What happens when a line item's transaction date falls outside the trip dates? The tool reports it as a violation rather than silently accepting it.
+- What happens when the policy file lists no rate for the transaction month? The tool reports malformed input rather than falling back to another month.
+- How does the system handle a submission with no line items? It passes with no violations and reports the lowest approval tier.
+- What happens when an amount is negative? The tool reports malformed input.
+
+## Requirements *(mandatory)*
+
+### Functional Requirements
+
+- **FR-001**: System MUST read every policy value — tier caps, receipt threshold, proration rate, approval tiers, and exchange rates — from a policy data file supplied at runtime.
+- **FR-002**: System MUST compare each meal line item against the daily meal cap for the destination tier recorded on the submission.
+- **FR-003**: System MUST apply a prorated cap of 75 percent of the daily cap to the first and last day of a trip, applying it once when those are the same day.
+- **FR-004**: System MUST convert line items denominated in EUR, GBP or CHF to US dollars using the rate in force on the line item's transaction date before applying any cap.
+- **FR-005**: System MUST report malformed input when a line item uses a currency the policy file does not list, rather than assuming a rate.
+- **FR-006**: System MUST report a blocking violation for any line item above the receipt threshold that has no receipt reference.
+- **FR-007**: System MUST determine the required approval tier from the submission total using the thresholds in the policy file.
+- **FR-008**: System MUST report every violation found in a single pass rather than stopping at the first.
+- **FR-009**: System MUST exit with status 0 when no violations are found, 1 when violations are found, and 2 when the input is malformed.
+- **FR-010**: Each reported violation MUST name the policy rule that produced it, the offending amount, and the limit that was exceeded.
+
+### Key Entities *(include if feature involves data)*
+
+- **ExpenseSubmission**: One employee's expenses for one trip. Carries the traveller, the trip start and end dates, the destination city tier, and a collection of line items.
+- **LineItem**: A single claimed expense. Carries a date, a category, an amount, a currency, an optional receipt reference, and a description.
+- **PolicyRule**: A single reimbursement constraint read from the policy file, such as a tier cap or the receipt threshold. Carries an identifier, a limit, and the text used when reporting a violation.
+- **Violation**: One failed check. Carries the line item it refers to, the policy rule that failed, the offending amount, and the limit.
+
+## Success Criteria *(mandatory)*
+
+### Measurable Outcomes
+
+- **SC-001**: Every reported violation traces to exactly one named policy rule, so a reviewer can resolve a dispute without reading the source code.
+- **SC-002**: Changing any policy number requires editing only the policy data file and its test, with no change to application code.
+- **SC-003**: A submission of 100 line items is validated in under one second on a standard laptop.
+- **SC-004**: A submission containing five distinct violations reports all five on a single run.
+- **SC-005**: Finance reduces the time spent manually checking submissions from two days a month to under two hours.
+
+## Assumptions
+
+- Submissions arrive as a single structured file per trip. Batch validation across many submissions is out of scope for this version.
+- The city tier is recorded on the submission rather than derived from the destination name, because the tier list changes independently of this tool.
+- Exchange rates are supplied in the policy data file and maintained by Finance monthly. The tool does not fetch rates, which keeps it offline and deterministic.
+- EUR, GBP and CHF are supported, matching policy from next quarter. Adding a currency is a policy file edit.
+- Approval routing reports the required tier. Actually routing the submission for approval belongs to the existing workflow system and is out of scope.

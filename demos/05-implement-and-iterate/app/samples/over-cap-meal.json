@@ -1,0 +1,25 @@
+{
+  "submission_id": "EXP-2026-0418",
+  "traveller": "A. Rivera",
+  "trip_start": "2026-03-09",
+  "trip_end": "2026-03-12",
+  "city_tier": 2,
+  "line_items": [
+    {
+      "date": "2026-03-10",
+      "category": "meal",
+      "amount": "72.00",
+      "currency": "USD",
+      "receipt": null,
+      "description": "Team dinner"
+    },
+    {
+      "date": "2026-03-11",
+      "category": "meal",
+      "amount": "44.00",
+      "currency": "USD",
+      "receipt": null,
+      "description": "Meals, full day"
+    }
+  ]
+}

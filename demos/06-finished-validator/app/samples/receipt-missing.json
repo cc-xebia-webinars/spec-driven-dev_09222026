@@ -1,0 +1,25 @@
+{
+  "submission_id": "EXP-2026-0421",
+  "traveller": "A. Rivera",
+  "trip_start": "2026-04-06",
+  "trip_end": "2026-04-08",
+  "city_tier": 3,
+  "line_items": [
+    {
+      "date": "2026-04-07",
+      "category": "transport",
+      "amount": "120.00",
+      "currency": "USD",
+      "receipt": null,
+      "description": "Rail fare, no receipt kept"
+    },
+    {
+      "date": "2026-04-07",
+      "category": "meal",
+      "amount": "30.00",
+      "currency": "USD",
+      "receipt": null,
+      "description": "Lunch"
+    }
+  ]
+}

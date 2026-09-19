@@ -1,0 +1,25 @@
+{
+  "submission_id": "EXP-2026-0433",
+  "traveller": "A. Rivera",
+  "trip_start": "2026-03-16",
+  "trip_end": "2026-03-18",
+  "city_tier": 2,
+  "line_items": [
+    {
+      "date": "2026-03-17",
+      "category": "meal",
+      "amount": "58.00",
+      "currency": "EUR",
+      "receipt": null,
+      "description": "Dinner in euros"
+    },
+    {
+      "date": "2026-03-17",
+      "category": "transport",
+      "amount": "45.00",
+      "currency": "GBP",
+      "receipt": "R-9001",
+      "description": "Taxi in pounds"
+    }
+  ]
+}

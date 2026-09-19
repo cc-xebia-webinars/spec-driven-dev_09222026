@@ -1,0 +1,40 @@
+--- a/specs/001-expense-policy-validator/spec.md
++++ b/specs/001-expense-policy-validator/spec.md
+@@ -17,6 +17,10 @@
+ - Q: What happens when an expense above the receipt threshold arrives without a receipt? → A: It is a blocking violation, not a warning. The submission does not pass.
+ - Q: Where do the approval tier thresholds come from? → A: The policy data file, never hard-coded. Tiers are 500 USD and 2,500 USD.
+ - Q: How should the tool report results to a caller? → A: Every violation in one pass, with exit code 0 for clean, 1 for violations found, and 2 for malformed input.
++
++### Session 2026-04-02
++
++- Q: Finance has updated the travel policy for next quarter. What changes? → A: The receipt threshold rises from 75 USD to 100 USD, and CHF becomes a supported currency.
+ 
+ ## User Scenarios & Testing *(mandatory)*
+ 
+@@ -46,8 +50,8 @@
+ 
+ **Acceptance Scenarios**:
+ 
+-1. **Given** a receipt threshold of 75 USD, **When** a 120 USD line item has no receipt, **Then** the tool reports a blocking receipt violation.
+-2. **Given** a receipt threshold of 75 USD, **When** a 40 USD line item has no receipt, **Then** the tool reports no violation for that line.
++1. **Given** a receipt threshold of 100 USD, **When** a 120 USD line item has no receipt, **Then** the tool reports a blocking receipt violation.
++2. **Given** a receipt threshold of 100 USD, **When** a 90 USD line item has no receipt, **Then** the tool reports no violation for that line.
+ 3. **Given** a 120 USD line item with a receipt reference present, **When** the submission is validated, **Then** the tool reports no receipt violation.
+ 
+ ---
+@@ -83,7 +87,7 @@
+ - **FR-001**: System MUST read every policy value — tier caps, receipt threshold, proration rate, approval tiers, and exchange rates — from a policy data file supplied at runtime.
+ - **FR-002**: System MUST compare each meal line item against the daily meal cap for the destination tier recorded on the submission.
+ - **FR-003**: System MUST apply a prorated cap of 75 percent of the daily cap to the first and last day of a trip, applying it once when those are the same day.
+-- **FR-004**: System MUST convert line items denominated in EUR or GBP to US dollars using the rate in force on the line item's transaction date before applying any cap.
++- **FR-004**: System MUST convert line items denominated in EUR, GBP or CHF to US dollars using the rate in force on the line item's transaction date before applying any cap.
+ - **FR-005**: System MUST report malformed input when a line item uses a currency the policy file does not list, rather than assuming a rate.
+ - **FR-006**: System MUST report a blocking violation for any line item above the receipt threshold that has no receipt reference.
+ - **FR-007**: System MUST determine the required approval tier from the submission total using the thresholds in the policy file.
+@@ -113,5 +117,5 @@
+ - Submissions arrive as a single structured file per trip. Batch validation across many submissions is out of scope for this version.
+ - The city tier is recorded on the submission rather than derived from the destination name, because the tier list changes independently of this tool.
+ - Exchange rates are supplied in the policy data file and maintained by Finance monthly. The tool does not fetch rates, which keeps it offline and deterministic.
+-- Only EUR and GBP are supported, matching current policy. Adding a currency is a policy file edit.
++- EUR, GBP and CHF are supported, matching policy from next quarter. Adding a currency is a policy file edit.
+ - Approval routing reports the required tier. Actually routing the submission for approval belongs to the existing workflow system and is out of scope.

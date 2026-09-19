@@ -1,0 +1,43 @@
+{
+  "policy_version": "2026.1",
+  "effective_date": "2026-01-01",
+  "meal_caps_usd": {
+    "1": "75.00",
+    "2": "60.00",
+    "3": "45.00"
+  },
+  "partial_day_rate": "0.75",
+  "receipt_threshold_usd": "75.00",
+  "approval_tiers": [
+    {
+      "id": "manager",
+      "max_total_usd": "500.00",
+      "label": "Manager approval"
+    },
+    {
+      "id": "director",
+      "max_total_usd": "2500.00",
+      "label": "Director approval"
+    },
+    {
+      "id": "finance",
+      "max_total_usd": null,
+      "label": "Finance pre-review"
+    }
+  ],
+  "supported_currencies": [
+    "USD",
+    "EUR",
+    "GBP"
+  ],
+  "exchange_rates_to_usd": {
+    "EUR": {
+      "2026-03": "1.08",
+      "2026-04": "1.09"
+    },
+    "GBP": {
+      "2026-03": "1.27",
+      "2026-04": "1.28"
+    }
+  }
+}

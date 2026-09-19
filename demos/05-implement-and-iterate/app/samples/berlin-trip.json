@@ -1,0 +1,49 @@
+{
+  "submission_id": "EXP-2026-0412",
+  "traveller": "A. Rivera",
+  "trip_start": "2026-03-09",
+  "trip_end": "2026-03-12",
+  "city_tier": 2,
+  "line_items": [
+    {
+      "date": "2026-03-09",
+      "category": "meal",
+      "amount": "38.00",
+      "currency": "USD",
+      "receipt": null,
+      "description": "Dinner on arrival"
+    },
+    {
+      "date": "2026-03-10",
+      "category": "meal",
+      "amount": "55.00",
+      "currency": "USD",
+      "receipt": null,
+      "description": "Meals, full day"
+    },
+    {
+      "date": "2026-03-11",
+      "category": "meal",
+      "amount": "59.50",
+      "currency": "USD",
+      "receipt": null,
+      "description": "Meals, full day"
+    },
+    {
+      "date": "2026-03-12",
+      "category": "meal",
+      "amount": "22.00",
+      "currency": "USD",
+      "receipt": null,
+      "description": "Breakfast before flight"
+    },
+    {
+      "date": "2026-03-10",
+      "category": "transport",
+      "amount": "41.00",
+      "currency": "USD",
+      "receipt": "R-8821",
+      "description": "Airport transfer"
+    }
+  ]
+}

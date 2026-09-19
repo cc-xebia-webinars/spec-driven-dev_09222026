@@ -1,0 +1,14 @@
+[project]
+name = "speckit-demo-03"
+version = "0.1.0"
+description = "Spec Kit workflow demo. Pins the Spec Kit CLI to release 1.0.8 so every run uses the same verified version."
+requires-python = ">=3.13,<3.14"
+dependencies = []
+
+[dependency-groups]
+dev = ["specify-cli==1.0.8"]
+
+[tool.uv]
+# Nothing to build here: this folder holds specifications, not a Python package.
+package = false
+
